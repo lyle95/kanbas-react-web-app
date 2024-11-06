@@ -4,6 +4,9 @@ export default function CoursesNavigation() {
   const { pathname } = useLocation();
   const { cid } = useParams();
   const course = courses.find((course) => course._id === cid);
+  // Debugging Logs
+  console.log("Courses Navigation - Course ID:", cid);
+  console.log("Found Course:", course);
   if (!course) {
     return <div>Course not found</div>;
   }
