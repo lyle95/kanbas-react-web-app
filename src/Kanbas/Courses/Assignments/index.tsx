@@ -36,31 +36,11 @@ export default function Assignments() {
             console.error("Error creating assignment:", error);
         }
     };
-    const addNewAssignment = () => {
-        if (!assignmentName.trim()) return;
-        const newAssignment = {
-            _id: new Date().getTime().toString(),
-            title: assignmentName,
-            description: "",
-            points: 100,
-            due: "",
-            availableFrom: "",
-            until: "",
-            course: cid,
-        };
-        dispatch(addAssignment(newAssignment));
-        setAssignmentName("");
-    };
+    
     const removeAssignment = async (assignmentId: string) => {
         await assignmentClient.deleteAssignment(assignmentId);
         dispatch(deleteAssignment(assignmentId));
     };
-    const handleDelete = (assignmentId: string) => {
-        const confirmDelete = window.confirm("Are you sure you want to delete this assignment?");
-        if (confirmDelete) {
-            dispatch(deleteAssignment(assignmentId));
-        }
-    }
     return (
         <div>
         <AssignmentsControls
@@ -84,9 +64,13 @@ export default function Assignments() {
                                 <BsGripVertical className="me-2 fs-3" />
                                 <FaRegEdit className="me-3 fs-3" />
                                 <div>
-                                    <Link to={`/Kanbas/Courses/${cid}/Assignments/${assignment._id}`} className="wd-assignment-link" >
-                                        {assignment.title}
-                                    </Link>
+                                    {currentUser?.role === "FACULTY" ? (
+                                        <Link to={`/Kanbas/Courses/${cid}/Assignments/${assignment._id}`} className="wd-assignment-link" >
+                                            {assignment.title}
+                                        </Link>
+                                    ) : (
+                                        <span className="fw-bold">{assignment.title}</span>
+                                    )}
                                     <div className="text-muted small ms-3">
                                         <span className="text-danger">Multiple Modules</span> | 
                                         <b> Not available until</b> {new Date(assignment.available).toLocaleString('en-US', {timeZone: 'UTC'})} | 
