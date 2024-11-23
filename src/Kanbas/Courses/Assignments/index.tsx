@@ -4,9 +4,11 @@ import LessonControlButtons from "../Modules/LessonControlButtons";
 import { FaRegEdit, FaTrash } from "react-icons/fa";
 import { BsGripVertical } from "react-icons/bs";
 import { useParams, Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addAssignment, deleteAssignment } from "./reducer";
+import { setAssignments, addAssignment, deleteAssignment } from "./reducer";
+import * as coursesClient from "../client";
+import * as assignmentClient from "./client";
 export default function Assignments() {
     const { cid } = useParams();
     const [assignmentName, setAssignmentName] = useState("");
@@ -14,7 +16,26 @@ export default function Assignments() {
     const { currentUser } = useSelector((state: any) => state.accountReducer);
     const assignments = useSelector((state: any) => state.assignmentReducer.assignments);
     const courseAssignments = assignments.filter((assignment: any) => assignment.course === cid);
-
+    const fetchAssignments = async () => {
+        const assignemnts = await coursesClient.findAssignmentsForCourse(cid as string);
+        dispatch(setAssignments(assignemnts));
+    }
+    useEffect(() => {
+        fetchAssignments();
+    }, []);
+    const createAssignmentForCourse = async () => {
+        if (!cid) return;
+        const newAssignment = { name: assignmentName, course: cid };
+        try {
+            const assignment = await coursesClient.createAssignmentForCourse(cid, newAssignment);
+            if (assignment) {
+                dispatch(addAssignment(assignment));
+                setAssignmentName("");
+            }
+        } catch (error) {
+            console.error("Error creating assignment:", error);
+        }
+    };
     const addNewAssignment = () => {
         if (!assignmentName.trim()) return;
         const newAssignment = {
@@ -30,6 +51,10 @@ export default function Assignments() {
         dispatch(addAssignment(newAssignment));
         setAssignmentName("");
     };
+    const removeAssignment = async (assignmentId: string) => {
+        await assignmentClient.deleteAssignment(assignmentId);
+        dispatch(deleteAssignment(assignmentId));
+    };
     const handleDelete = (assignmentId: string) => {
         const confirmDelete = window.confirm("Are you sure you want to delete this assignment?");
         if (confirmDelete) {
@@ -41,7 +66,7 @@ export default function Assignments() {
         <AssignmentsControls
         assignmentName={assignmentName}
         setAssignmentName={setAssignmentName}
-        addAssignment={addNewAssignment} />
+        addAssignment={createAssignmentForCourse} />
             <br />
             <ul id="wd-assignments" className="list-group rounded-0">
                 <li className="wd-assignment list-group-item p-0 mb-5 fs-5 border-gray">
@@ -73,7 +98,7 @@ export default function Assignments() {
                                 <div className="d-flex align-items-center">
                                     <FaTrash className="me-2" 
                                         onClick={() => 
-                                        handleDelete(assignment._id)} id="wd-delete-assignment-click"/>
+                                        removeAssignment(assignment._id)} id="wd-delete-assignment-click"/>
                                     <LessonControlButtons />
                                 </div>
                             )}

@@ -3,13 +3,28 @@ import * as db from "../../Database";
 import { useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
 import { addAssignment, updateAssignment } from "./reducer";
+import * as assignmentsClient from "./client";
+import * as courseClient from "../client";
 export default function AssignmentEditor() {
     const { aid, cid } = useParams();
     const isNewAssignment = aid === "new";
     const dispatch = useDispatch();
     const assignments = db.assignments;
     const navigate = useNavigate();
-    
+    const saveAssignment = async (assignment: any) => {
+        if (!cid) {
+            console.error("Course ID is not defined.");
+            return;
+        }
+        if (isNewAssignment) {
+            const createdAssignment = await courseClient.createAssignmentForCourse(cid, assignment);
+            dispatch(addAssignment(createdAssignment));
+        } else {
+            await assignmentsClient.updateAssignment(assignment);
+            dispatch(updateAssignment(assignment));
+        }
+        navigate(`/Kanbas/Courses/${cid}/Assignments`);
+    };
     type Assignment = {
         _id: string;
         title: string
@@ -114,7 +129,7 @@ export default function AssignmentEditor() {
             <hr />
             <div className="d-flex justify-content-end mt-3">
                 <Link to={`/Kanbas/Courses/${cid}/Assignments`} className="btn btn-secondary me-2">Cancel</Link>
-                <button className="btn btn-danger" onClick={handleSave}>Save</button>
+                <button className="btn btn-danger" onClick={() => saveAssignment(currentAssignment)}>Save</button>
             </div>
             <br />
         </div>
