@@ -25,7 +25,8 @@ export default function Assignments() {
     }, []);
     const createAssignmentForCourse = async () => {
         if (!cid) return;
-        const newAssignment = { name: assignmentName, course: cid };
+        const newAssignment = { 
+            title: assignmentName, course: cid };
         try {
             const assignment = await coursesClient.createAssignmentForCourse(cid, newAssignment);
             if (assignment) {
@@ -65,7 +66,7 @@ export default function Assignments() {
                                 <FaRegEdit className="me-3 fs-3" />
                                 <div>
                                     {currentUser?.role === "FACULTY" ? (
-                                        <Link to={`/Kanbas/Courses/${cid}/Assignments/${assignment._id}`} className="wd-assignment-link" >
+                                        <Link to={`/Kanbas/Courses/${cid}/Assignments/${assignment._id}`} className="wd-assignment-link">
                                             {assignment.title}
                                         </Link>
                                     ) : (

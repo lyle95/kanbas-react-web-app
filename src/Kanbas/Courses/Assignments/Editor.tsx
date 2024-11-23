@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import * as db from "../../Database";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import { addAssignment, updateAssignment } from "./reducer";
 import * as assignmentsClient from "./client";
@@ -9,8 +9,9 @@ export default function AssignmentEditor() {
     const { aid, cid } = useParams();
     const isNewAssignment = aid === "new";
     const dispatch = useDispatch();
-    const assignments = db.assignments;
+    const assignments = useSelector((state: any) => state.assignmentReducer.assignments || []);
     const navigate = useNavigate();
+
     const saveAssignment = async (assignment: any) => {
         if (!cid) {
             console.error("Course ID is not defined.");
@@ -20,8 +21,8 @@ export default function AssignmentEditor() {
             const createdAssignment = await courseClient.createAssignmentForCourse(cid, assignment);
             dispatch(addAssignment(createdAssignment));
         } else {
-            await assignmentsClient.updateAssignment(assignment);
-            dispatch(updateAssignment(assignment));
+            await assignmentsClient.updateAssignment(currentAssignment);
+            dispatch(updateAssignment(currentAssignment));
         }
         navigate(`/Kanbas/Courses/${cid}/Assignments`);
     };
@@ -31,46 +32,39 @@ export default function AssignmentEditor() {
         description: string;
         points: number;
         due: string;
-        availableFrom: string;
+        available: string;
         until: string;
         course: string;
     };
 
     const defaultAssignment = {
-        _id: aid || 'New ID',
+        _id: aid || 'new',
         title: '',
         description: '',
         points: 100,
         due: '',
-        availableFrom: '',
+        available: '',
         until: '',
         course: cid || '',
     };
 
     const [currentAssignment, setCurrentAssignment] = 
         useState<Assignment>(defaultAssignment);
-
+/*
     useEffect(() => {
         const existingAssignment = assignments.find(a => a._id === aid) as Assignment | undefined;
         if (existingAssignment) {
             setCurrentAssignment({ ...defaultAssignment, ...existingAssignment,});
         }
-    }, [aid, assignments]);
-
-    const handleSave = () => {
-        if (!cid) {
-            console.error("Course ID is not defined.");
-            return;
-        }
-        const updatedAssignment = { ...currentAssignment, course: cid };
-
+    }, [aid, assignments]);*/
+    useEffect(() => {
         if (!isNewAssignment) {
-            dispatch(updateAssignment(updatedAssignment));
-        } else {
-            dispatch(addAssignment(updatedAssignment));
+            const existingAssignment = assignments.find((a: Assignment) => a._id === aid);
+            if (existingAssignment) {
+                setCurrentAssignment({ ...defaultAssignment, ...existingAssignment });
+            }
         }
-        navigate(`/Kanbas/Courses/${cid}/Assignments`);
-    };
+    }, [aid, assignments, isNewAssignment]);
 
     return (
         <div id="wd-assignment-editor">
@@ -113,7 +107,7 @@ export default function AssignmentEditor() {
                                 <div className="col-md-6">
                                     <label htmlFor="wd-available-from" className="form-label fw-bold pt-3">Available from</label>
                                     <input className="form-control mb-3" type="date" id="wd-available-from" 
-                                        value={currentAssignment.availableFrom} onChange={(e) => setCurrentAssignment({ ...currentAssignment, availableFrom: e.target.value })} />
+                                        value={currentAssignment.available} onChange={(e) => setCurrentAssignment({ ...currentAssignment, available: e.target.value })} />
                                 </div> 
                                 <div className="col-md-6">
                                     <label htmlFor="wd-available-until" className="form-label fw-bold pt-3">Until</label>

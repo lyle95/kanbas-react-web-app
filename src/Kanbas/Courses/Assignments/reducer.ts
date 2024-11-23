@@ -34,7 +34,7 @@ const assignmentSlice = createSlice({
         description: assignment.description,
         points: assignment.points,
         due: assignment.due,
-        availableFrom: assignment.availableFrom,
+        available: assignment.available,
         until: assignment.until,
         course:assignment.course,
       };
