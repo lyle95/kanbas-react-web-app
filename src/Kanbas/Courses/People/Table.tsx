@@ -1,13 +1,34 @@
-import React from "react";
-// import { useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 // import * as db from "../../Database";
 import { FaUserCircle } from "react-icons/fa";
-import * as client from "../../Account/client";
+import * as courseClient from "../../Courses/client";
 import PeopleDetails from "./Details";
 import { Link } from "react-router-dom";
-export default function PeopleTable({ users = [] }: { users?: any[] }) {
-  // const { cid } = useParams();
-  // const { users, enrollments } = db;
+export default function PeopleTable({ users, courseId }: { users?: any[]; courseId?: string }) {
+  const { cid } = useParams();
+  const [enrolledUsers, setEnrolledUsers] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Fetch enrolled users if courseId is provided (People route under Courses)
+    if (!users && (courseId || cid)) {
+      const fetchEnrolledUsers = async () => {
+        try {
+          const courseToFetch = courseId || cid;
+          if (courseToFetch) {
+            const fetchedUsers = await courseClient.findUsersForCourse(courseToFetch);
+            setEnrolledUsers(fetchedUsers);
+          }
+        } catch (error) {
+          console.error("Failed to fetch enrolled users:", error);
+        }
+      };
+
+      fetchEnrolledUsers();
+    }
+  }, [users, courseId, cid]);
+
+  const usersToDisplay = users || enrolledUsers;
   return (
     <div id="wd-people-table">
       <PeopleDetails />
@@ -18,7 +39,7 @@ export default function PeopleTable({ users = [] }: { users?: any[] }) {
           </tr>
         </thead>
         <tbody>
-        {users
+        {usersToDisplay
           .map((user: any) => (
           <tr key={user._id}>
             <td className="wd-full-name text-nowrap">
@@ -40,3 +61,4 @@ export default function PeopleTable({ users = [] }: { users?: any[] }) {
       </table>
     </div>
 );}
+

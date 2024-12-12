@@ -4,6 +4,11 @@ const REMOTE_SERVER = process.env.REACT_APP_REMOTE_SERVER;
 const COURSES_API = `${REMOTE_SERVER}/api/courses`;
 const ENROLLMENTS_API = `${REMOTE_SERVER}/api/enrollments`;
 
+export const findUsersForCourse = async (courseId: string) => {
+  const response = await axios.get(`${COURSES_API}/${courseId}/users`);
+  return response.data;
+};
+ 
 export const createCourse = async (course: any) => {
   const { data } = await axiosWithCredentials.post(COURSES_API, course);
   return data;
@@ -52,6 +57,7 @@ export const unenrollFromCourse = async (userId: string, courseId: string) => {
     const response = await axios.delete(`${ENROLLMENTS_API}/${userId}/${courseId}`);
     return response.data;
 };
+
 /*
 export const fetchEnrolledCourse = async (userId: string) => {
     const response = await axios.get(`${ENROLLMENTS_API}/${userId}`);
