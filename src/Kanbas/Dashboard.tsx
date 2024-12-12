@@ -10,6 +10,8 @@ export default function Dashboard({
     addNewCourse,
     deleteCourse,
     updateCourse,
+    enrolling, 
+    setEnrolling
 }: {
     courses: any[];
     course: any;
@@ -17,6 +19,8 @@ export default function Dashboard({
     addNewCourse: () => void;
     deleteCourse: (course: any) => void;
     updateCourse: () => void;
+    enrolling: boolean; 
+    setEnrolling: (enrolling: boolean) => void;
 }) {
     const { currentUser } = useSelector((state: any) => state.accountReducer);
     const [enrolledCourses, setEnrolledCourses] = useState<string[]>([]);
@@ -73,7 +77,8 @@ export default function Dashboard({
     const displayedCourses = showAllCourses ? allCourses : enrolledCourses;
     return (
         <div className="p-4" id="wd-dashboard">
-            <h1 id="wd-dashboard-title">Dashboard</h1> <hr />
+            <h1 id="wd-dashboard-title">Dashboard
+            </h1> <hr />
             {currentUser?.role === "FACULTY" && (
                 <>
                     <h5>
@@ -99,17 +104,17 @@ export default function Dashboard({
                     <hr />
                 </>
             )}
-            {currentUser?.role === "STUDENT" && (
+            
+           
                 <button className="btn btn-primary float-end" onClick={handleFetchAllCourses}>
                     {showAllCourses ? "My Enrollments" : "All Courses"}
                 </button>
-            )}
+            
             <h2 id="wd-dashboard-published">Published Courses ({displayedCourses.length})</h2>
             <hr />
             <div id="wd-dashboard-courses" className="row">
                 <div className="row row-cols-1 row-cols-md-5 g-4">
                     {displayedCourses.map((course) => {
-                        const isEnrolled = enrolledCourses.includes(course._id); // Check if the course is already enrolled
                         return (
                             <div className="wd-dashboard-course col" style={{ width: "300px" }} key={course._id}>
                                 <div className="card rounded-3 overflow-hidden">
@@ -120,7 +125,14 @@ export default function Dashboard({
                                     >
                                         <img src={course.image} width="100%" height={160} alt="Course logo" />
                                         <div className="card-body">
-                                            <h5 className="wd-dashboard-course-title card-title">{course.name}</h5>
+                                            <h5 className="wd-dashboard-course-title card-title">
+                                                {enrolling && (
+                                                    <button className={`btn ${ course.enrolled ? "btn-danger" : "btn-success" } float-end`} >
+                                                        {course.enrolled ? "Unenroll" : "Enroll"}
+                                                    </button>
+                                                )}
+                                                {course.name}
+                                            </h5>
                                             <p className="wd-dashboard-course-title card-text overflow-y-hidden" style={{ maxHeight: 100 }}>
                                                 {course.description}
                                             </p>
@@ -152,7 +164,7 @@ export default function Dashboard({
                                                     </button>
                                                 </>
                                             )}
-                                            {currentUser?.role === "STUDENT" && (
+                                            
                                                 <button
                                                     onClick={(event) => {
                                                         event.stopPropagation();
@@ -168,7 +180,7 @@ export default function Dashboard({
                                                     ? "Unenroll" 
                                                     : "Enroll"}
                                                 </button>
-                                            )}
+                                            
                                         </div>
                                     </div>
                                 </div>
