@@ -1,9 +1,26 @@
 import { Link, useLocation, useParams } from "react-router-dom";
-import { courses } from "../Database";
+import { useEffect, useState } from "react";
+import * as courseClient from "../Courses/client";
+//import { courses } from "../Database";
 export default function CoursesNavigation() {
   const { pathname } = useLocation();
   const { cid } = useParams();
-  const course = courses.find((course) => course._id === cid);
+  const [course, setCourse] = useState<any | null>(null);
+  //const course = courses.find((course) => course._id === cid);
+  useEffect(() => {
+    const fetchCourse = async () => {
+      if (cid) {
+        try {
+          const fetchedCourse = await courseClient.fetchAllCourses();
+          const currentCourse = fetchedCourse.find((course: any) => course._id === cid);
+          setCourse(currentCourse);
+        } catch (error) {
+          console.error("Error fetching course:", error);
+        }
+      }
+    };
+    fetchCourse();
+  }, [cid]);
   // Debugging Logs
   console.log("Courses Navigation - Course ID:", cid);
   console.log("Found Course:", course);
